@@ -1,0 +1,35 @@
+#root {
+  width:100%;
+  height:100%;
+  font-size:20px;
+  background-color:#111;
+}
+
+#clu-layout {
+  display:grid;
+  grid-template-rows:60px auto 60px;
+  width:100%;
+  height:720px;
+  justify-content: center;
+}
+
+.grid-component {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:absolute;
+}
+
+.shade {
+  width:100%;
+  height:100%;
+  position: absolute;
+  left:0;
+  top:0;
+  z-index: 10000;
+}
+
+header, main, footer {
+  width:100vw;
+  position: relative;
+}
