@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { gx } from "../rules/gridSizing";
 import { useCAN } from '../context/CANProvider';
 
-const GridComponent = ({children,w=1,h=1, aW, aH, x=0,y=0, aX,aY, xAlign='center', yAlign='top', style}) => {
+const GridComponent = ({children, w=1,h=1, aW, aH, x=0,y=0, aX,aY, xAlign='center', yAlign='top', style}) => {
     const { canSignals } = useCAN();
     const [currentWidth, setCurrentWidth] = useState(w);
     const [currentHeight, setCurrentHeight] = useState(h);

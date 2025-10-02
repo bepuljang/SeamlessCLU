@@ -17,7 +17,8 @@ export const CANProvider = ({ children }) => {
         odometer: 12543,       // km
         tripMeter: 0,          // km
         range: 380,            // Remaining range in km
-        powerConsumption: 0,   // kW (negative for regeneration)
+        powerConsumption: 0,   // kW (negative for regeneration),
+        brainStatus:0,
         signalTimestamp: Date.now()
     });
 
@@ -120,7 +121,7 @@ export const CANProvider = ({ children }) => {
         updateSignals,
         simulationMode,
         setSimulationMode,
-        getAutonomousStatusName
+        getAutonomousStatusName,
     };
 
     return (

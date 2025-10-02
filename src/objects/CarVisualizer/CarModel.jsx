@@ -6,8 +6,8 @@ import { useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 
 function CarModel({ color = '#1e40af', onLoaded, position = [0, 0, 0], scale = 0.01, speed = 0, gearMode = 0 }) {
-    const mtl = useLoader(MTLLoader, '/src/assets/obj/2025 Genesis_GV60.mtl');
-    const obj = useLoader(OBJLoader, '/src/assets/obj/2025 Genesis GV60.obj', (loader) => {
+    const mtl = useLoader(MTLLoader, '/src/assets/obj/2025_Genesis_GV60_reduced.mtl');
+    const obj = useLoader(OBJLoader, '/src/assets/obj/2025_Genesis_GV60_reduced.obj', (loader) => {
         mtl.preload();
         loader.setMaterials(mtl);
     });

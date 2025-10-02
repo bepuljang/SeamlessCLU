@@ -17,10 +17,10 @@ function CameraController({ gearMode, speed, autonomousStatus, aspectRatio }) {
 
     // 카메라 뷰 프리셋 (모델이 Z축 방향을 향하도록 조정)
     const cameraViews = {
-        default: { position: [7, 2, 6], target: [0, 0, 0] },
-        driving_ready: { position: [0, 2, -10], target: [0, 0, 0] },
-        over_zero: { position: [0, 5, -11], target: [0, 0, 0] },
-        top_view: { position: [0, 8, -1], target: [0, 0, 0] }
+        default: { position: [7, 3, 6], target: [0, 0, 0] },
+        driving_ready: { position: [0, 4, -9], target: [0, 0, 0] },
+        over_zero: { position: [0, 6, -10], target: [0, 0, 0] },
+        top_view: { position: [0, 10, -1], target: [0, 0, 0] }
     };
 
     // 기어 모드와 속도, 자율주행 상태에 따른 카메라 뷰 변경
@@ -100,15 +100,18 @@ function CameraController({ gearMode, speed, autonomousStatus, aspectRatio }) {
 }
 
 // 움직이는 도로 차선 컴포넌트
-function MovingRoadLines({ speed }) {
+function MovingRoadLines({ speed, yOffset = 0 }) {
     // 차선 생성 - 사이드 실선만
     const lines = [];
+
+    // 도로 높이 계산 (기본 높이 -0.98에 오프셋 추가)
+    const roadY = -0.4 + yOffset;
 
     // 좌우 사이드 라인 (고정) - 간격을 절반으로 줄임
     lines.push(
         <group key="side-lines">
             {/* 좌측 긴 실선 */}
-            <mesh position={[-1.5, -0.98, 0]}>
+            <mesh position={[-1.5, roadY, 0]}>
                 <boxGeometry args={[0.1, 0.001, 30]} />
                 <meshStandardMaterial
                     color="#FFF"
@@ -118,7 +121,7 @@ function MovingRoadLines({ speed }) {
                 />
             </mesh>
             {/* 우측 긴 실선 */}
-            <mesh position={[1.5, -0.98, 0]}>
+            <mesh position={[1.5, roadY, 0]}>
                 <boxGeometry args={[0.1, 0.001, 30]} />
                 <meshStandardMaterial
                     color="#FFF"
@@ -225,10 +228,14 @@ function MovingLights({ speed }) {
     );
 }
 
-const CarVisualizer = ({ w = 32, h = 8, aW = 8, aH = 8, }) => {
+const CarVisualizer = ({ w = 32, h = 10, aW = 8, aH = 8, }) => {
     const [modelCenter, setModelCenter] = useState(new THREE.Vector3(0, 0, 0));
     const [modelSize, setModelSize] = useState(new THREE.Vector3(1, 1, 1));
-    const [modelPosition, setModelPosition] = useState({ x: 0, y: -0.50, z: 0 });
+
+    // 전체 씬 높이 조정 변수 (이 값을 변경하면 모델과 도로가 함께 이동)
+    const sceneYOffset = 0.5; // 위로 올릴 높이 (음수면 아래로)
+
+    const [modelPosition, setModelPosition] = useState({ x: 0, y: sceneYOffset, z: 0 });
     const [modelScale, setModelScale] = useState(0.02);  // 모델 스케일
     const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0, z: 0 });
     const [showControls, setShowControls] = useState(false); // 디버그 컨트롤 표시 여부
@@ -250,17 +257,21 @@ const CarVisualizer = ({ w = 32, h = 8, aW = 8, aH = 8, }) => {
     const canvasContent = useMemo(() => (
         <Canvas
             camera={{ position: [5, 2, 5], fov: 35 }}
-            style={{ width: '100%', height: '100%' }}
+            style={{ width: '100%', height: '100%', touchAction: 'none' }}
             shadows
             dpr={[1, 2]}
             frameloop="always"
+            onCreated={({ gl }) => {
+                gl.domElement.style.touchAction = 'none';
+                gl.domElement.style.userSelect = 'none';
+            }}
         >
             <Suspense fallback={null}>
                 {/* 속도에 따라 움직이는 조명 */}
                 <MovingLights speed={canSignals.speedValue} />
 
                 {/* 속도에 따라 움직이는 도로 차선 */}
-                <MovingRoadLines speed={canSignals.speedValue} />
+                <MovingRoadLines speed={canSignals.speedValue} yOffset={sceneYOffset} />
 
                 {/* 환경 조명 */}
                 <Environment preset="studio" intensity={0.6} />
@@ -286,7 +297,7 @@ const CarVisualizer = ({ w = 32, h = 8, aW = 8, aH = 8, }) => {
 
             </Suspense>
         </Canvas>
-    ), [canSignals.speedValue, canSignals.gearMode, canSignals.autonomousStatus, theme, modelPosition, modelScale, targetPosition, showTargetHelper]);
+    ), [canSignals.speedValue, canSignals.gearMode, canSignals.autonomousStatus, theme, sceneYOffset]);
 
     return (
         <GridComponent
@@ -296,6 +307,9 @@ const CarVisualizer = ({ w = 32, h = 8, aW = 8, aH = 8, }) => {
             yAlign="center"
             style={{
                 overflow: 'hidden',
+                pointerEvents: 'none',
+                touchAction: 'none',
+                userSelect: 'none'
             }}
             y={1}
             aX={-12}
@@ -311,8 +325,13 @@ const CarVisualizer = ({ w = 32, h = 8, aW = 8, aH = 8, }) => {
                     transform: `translate(-50%, -50%) scale(${scale})`,
                     transformOrigin: 'center center',
                     transition: 'transform 0.5s linear',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    pointerEvents: 'none',  // 모든 포인터 이벤트 차단
+                    touchAction: 'none',     // 터치 이벤트 차단
+                    userSelect: 'none'       // 텍스트 선택 차단
                 }}
+                onWheel={(e) => e.preventDefault()}
+                onTouchMove={(e) => e.preventDefault()}
             >
                 {canvasContent}
             </div>

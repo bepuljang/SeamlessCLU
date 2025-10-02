@@ -5,7 +5,7 @@ import Header from './sections/Header'
 import Body from './sections/Body'
 import Footer from './sections/Footer'
 import { colorScheme } from './rules/colorScheme'
-import SignalControls from './sections/SignalControls'
+import FloatingMenu from './components/FloatingMenu'
 
 const HMI = () => {
   const {theme} = useTheme();
@@ -25,7 +25,7 @@ function App() {
     <ContextProvider>
       <CANProvider>
         <HMI/>
-        <SignalControls/>
+        <FloatingMenu/>
       </CANProvider>
     </ContextProvider>
   )
